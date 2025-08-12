@@ -7,6 +7,9 @@ import detail from './modules/detail';
 import result from './modules/result';
 import user from './modules/user';
 import login from './modules/login';
+import device from './modules/device';
+import customer from './modules/customer';
+import workorder from './modules/workorder';
 import otherRoutes from './modules/others';
 
 export interface IRouter {
@@ -46,10 +49,10 @@ const routes: IRouter[] = [
   },
   {
     path: '/',
-    redirect: '/dashboard/base',
+    redirect: '/dashboard',
   },
 ];
 
-const allRoutes = [...routes, ...dashboard, ...list, ...form, ...detail, ...result, ...user, ...login, ...otherRoutes];
+const allRoutes = [...routes, ...dashboard, ...device, ...customer, ...workorder, ...list, ...form, ...detail, ...result, ...user, ...login, ...otherRoutes];
 
 export default allRoutes;
