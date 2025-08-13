@@ -12,16 +12,16 @@ const result: IRouter[] = [
     children: [
       {
         path: 'list',
-        Component: lazy(() => import('pages/Result/Maintenance')),
+        Component: lazy(() => import('pages/Device/List')),
         meta: {
           title: '设备列表',
         },
       },
       {
         path: 'category',
-        Component: lazy(() => import('pages/Result/Maintenance')),
+        Component: lazy(() => import('pages/Device/Category')),
         meta: {
-          title: '设备分类管理',
+          title: '设备分类',
         },
       },
     ],

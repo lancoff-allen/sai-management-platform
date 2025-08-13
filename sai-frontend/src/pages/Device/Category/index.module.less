@@ -1,0 +1,43 @@
+.toolBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  
+  .search {
+    width: 342px;
+    max-width: 100%;
+    min-width: 200px;
+    /* 移除 flex: 1; */
+  }
+}
+
+.cardList {
+  margin-top: 14px;
+  margin-bottom: 24px;
+  overflow-x: hidden; /* 防止横向滚动 */
+}
+
+.pagination {
+  padding: 16px;
+  overflow-x: auto; /* 分页器在小屏幕上可滚动 */
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+/* 响应式处理 */
+@media (max-width: 768px) {
+  .toolBar {
+    flex-direction: column;
+    align-items: stretch;
+    
+    .search {
+      width: 100%;
+    }
+  }
+}

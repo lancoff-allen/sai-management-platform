@@ -6,6 +6,9 @@ import user from './user';
 import listBase from './list/base';
 import listSelect from './list/select';
 import listCard from './list/card';
+import deviceCategory from './device/category';
+import deviceList from './device/list';
+import customerListReducer from './customer/list';
 
 const reducer = combineReducers({
   global,
@@ -13,10 +16,21 @@ const reducer = combineReducers({
   listBase,
   listSelect,
   listCard,
+  deviceCategory,
+  deviceList,
 });
 
 export const store = configureStore({
-  reducer,
+  reducer: {
+    global,
+    user,
+    listBase,
+    listSelect,
+    listCard,
+    deviceCategory,
+    deviceList,
+    customerList: customerListReducer,
+  },
 });
 
 export type RootState = ReturnType<typeof store.getState>;
