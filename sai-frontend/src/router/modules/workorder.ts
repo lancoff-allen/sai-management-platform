@@ -12,7 +12,7 @@ const result: IRouter[] = [
     children: [
       {
         path: 'io-check',
-        Component: lazy(() => import('pages/Result/Maintenance')),
+        Component: lazy(() => import('pages/IOInspection/List')),
         meta: {
           title: 'IO点检',
         },

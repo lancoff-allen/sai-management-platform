@@ -112,9 +112,10 @@ export const DeviceListTable = () => {
       title: '操作',
       colKey: 'operation',
       width: 140,
+      align: 'center' as const, // 添加 as const 类型断言
       fixed: 'right' as const,
       cell: ({ row }: any) => (
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
           <Button 
             theme='primary' 
             variant='text' 

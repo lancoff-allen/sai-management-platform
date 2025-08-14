@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { AppIcon } from 'tdesign-icons-react';
+import { ControlPlatformIcon } from 'tdesign-icons-react';
 import { IRouter } from '../index';
 
 const result: IRouter[] = [
@@ -7,7 +7,7 @@ const result: IRouter[] = [
     path: '/device',
     meta: {
       title: '设备管理',
-      Icon: AppIcon,
+      Icon: ControlPlatformIcon,  // 从 AppIcon 改为 ControlPlatformIcon
     },
     children: [
       {
