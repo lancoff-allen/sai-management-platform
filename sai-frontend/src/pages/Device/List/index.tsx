@@ -142,7 +142,11 @@ export const DeviceListTable = () => {
 
   return (
     <>
-      <SearchForm onSubmit={handleSearch} onCancel={handleReset} />
+      <SearchForm 
+        onSubmit={handleSearch} 
+        onCancel={handleReset}
+      />
+      
       <Table
         loading={loading}
         data={deviceList}

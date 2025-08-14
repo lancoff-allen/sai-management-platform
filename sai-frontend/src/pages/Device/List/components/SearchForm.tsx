@@ -1,5 +1,6 @@
 import React, { useRef, memo } from 'react';
 import { Row, Col, Form, Input, Button, MessagePlugin, Select } from 'tdesign-react';
+import { useNavigate } from 'react-router-dom';
 import { DEVICE_STATUS_OPTIONS, DeviceStatus } from 'services/device';
 import { FormInstanceFunctions, SubmitContext } from 'tdesign-react/es/form/type';
 
@@ -16,6 +17,7 @@ export type SearchFormProps = {
 };
 
 const SearchForm: React.FC<SearchFormProps> = (props) => {
+  const navigate = useNavigate();
   const formRef = useRef<FormInstanceFunctions>();
   
   const onSubmit = (e: SubmitContext) => {
@@ -29,6 +31,10 @@ const SearchForm: React.FC<SearchFormProps> = (props) => {
   const onReset = () => {
     props.onCancel();
     MessagePlugin.info('重置成功');
+  };
+
+  const handleAdd = () => {
+    navigate('/device/add-device'); // 修改跳转路径
   };
 
   return (
@@ -50,13 +56,10 @@ const SearchForm: React.FC<SearchFormProps> = (props) => {
             </Row>
           </Col>
           <Col flex='none' style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button theme='primary' type='submit' style={{ marginRight: '8px' }}>
-              查询
-            </Button>
             <Button type='reset' variant='base' theme='default' style={{ marginRight: '8px' }}>
               重置
             </Button>
-            <Button theme='primary' variant='outline'>
+            <Button theme='primary' variant='outline' onClick={handleAdd}>
               新增
             </Button>
           </Col>

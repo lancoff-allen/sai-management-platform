@@ -7,7 +7,7 @@ const result: IRouter[] = [
     path: '/device',
     meta: {
       title: '设备管理',
-      Icon: ControlPlatformIcon,  // 从 AppIcon 改为 ControlPlatformIcon
+      Icon: ControlPlatformIcon,
     },
     children: [
       {
@@ -18,12 +18,29 @@ const result: IRouter[] = [
         },
       },
       {
+        path: 'add-device',
+        Component: lazy(() => import('pages/Device/AddDevice')),
+        meta: {
+          title: '新增设备',
+          hidden: true,
+        },
+      },
+      {
         path: 'category',
         Component: lazy(() => import('pages/Device/Category')),
         meta: {
           title: '设备分类',
         },
       },
+      // 后续添加新增设备分类路由
+      // {
+      //   path: 'add-category',
+      //   Component: lazy(() => import('pages/Device/AddCategory')),
+      //   meta: {
+      //     title: '新增设备分类',
+      //     hidden: true,
+      //   },
+      // },
     ],
   },
 ];

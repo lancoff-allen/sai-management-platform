@@ -48,7 +48,7 @@ const initialState: IGlobalState = {
   setting: false,
   version,
   theme: defaultTheme,
-  systemTheme: false,
+  systemTheme: true, // 改为 true，默认跟随系统
   layout: ELayout.side,
   isFullPage: false,
   color: defaultColor?.[0],
@@ -94,14 +94,13 @@ const globalSlice = createSlice({
     },
     openSystemTheme: (state) => {
       const media = window.matchMedia('(prefers-color-scheme:dark)');
-      if (media.matches) {
-        const finalTheme = media.matches ? ETheme.dark : ETheme.light;
-        state.chartColors = CHART_COLORS[finalTheme];
-        // 切换主题颜色
-        state.theme = finalTheme;
-        state.systemTheme = true;
-        document.documentElement.setAttribute('theme-mode', finalTheme);
-      }
+      // 修复逻辑：根据 media.matches 正确判断主题
+      const finalTheme = media.matches ? ETheme.dark : ETheme.light;
+      state.chartColors = CHART_COLORS[finalTheme];
+      // 切换主题颜色
+      state.theme = finalTheme;
+      state.systemTheme = true;
+      document.documentElement.setAttribute('theme-mode', finalTheme);
     },
     switchColor: (state, action) => {
       if (action?.payload) {
