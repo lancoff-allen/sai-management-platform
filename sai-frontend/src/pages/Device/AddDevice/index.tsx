@@ -10,9 +10,10 @@ import {
   Textarea,
   MessagePlugin,
   Space,
-  Select, // 新增 Select 导入
+  Select,
+  Switch, // 新增 Switch 导入
 } from 'tdesign-react';
-import { AddIcon, DeleteIcon } from 'tdesign-icons-react';
+import { AddIcon, DeleteIcon, CheckIcon } from 'tdesign-icons-react'; // 新增 CheckIcon 导入
 import { useNavigate } from 'react-router-dom';
 import { FormInstanceFunctions, SubmitContext } from 'tdesign-react/es/form/type';
 import classnames from 'classnames';
@@ -59,7 +60,8 @@ interface IPartSet {
   id: string;
   name: string;
   code: string;
-  status: 'enabled' | 'disabled';
+  status: boolean; // 改为 boolean 类型
+  isEditing?: boolean; // 新增编辑状态标识
 }
 
 // 表单数据类型定义
@@ -98,38 +100,87 @@ const AddProductPage: React.FC = () => {
       title: '部套名称',
       colKey: 'name',
       width: 200,
+      cell: ({ row }: any) => {
+        if (row.isEditing) {
+          return (
+            <Input
+              value={row.name}
+              onChange={(value) => handlePartSetFieldChange(row.id, 'name', value)}
+              placeholder="请输入部套名称"
+            />
+          );
+        }
+        return row.name;
+      },
     },
     {
       title: '部套编号',
       colKey: 'code',
       width: 200,
+      cell: ({ row }: any) => {
+        if (row.isEditing) {
+          return (
+            <Input
+              value={row.code}
+              onChange={(value) => handlePartSetFieldChange(row.id, 'code', value)}
+              placeholder="请输入部套编号"
+            />
+          );
+        }
+        return row.code;
+      },
     },
     {
       title: '状态',
       colKey: 'status',
       width: 120,
-      cell: ({ row }: any) => (
-        <Tag theme={row.status === 'enabled' ? 'success' : 'default'}>
-          {row.status === 'enabled' ? '启用' : '禁用'}
-        </Tag>
-      ),
+      cell: ({ row }: any) => {
+        if (row.isEditing) {
+          return (
+            <Switch
+              value={row.status}
+              onChange={(value) => handlePartSetFieldChange(row.id, 'status', value)}
+            />
+          );
+        }
+        return (
+          <Tag theme={row.status ? 'success' : 'default'} variant="outline">
+            {row.status ? '启用' : '禁用'}
+          </Tag>
+        );
+      },
     },
     {
       title: '操作',
       colKey: 'operation',
       width: 120,
       align: 'center' as const,
-      cell: ({ row }: any) => (
-        <Button
-          theme="danger"
-          variant="text"
-          size="small"
-          onClick={() => handleDeletePartSet(row.id)}
-        >
-          <DeleteIcon />
-          删除
-        </Button>
-      ),
+      cell: ({ row }: any) => {
+        if (row.isEditing) {
+          return (
+            <Button
+              theme="primary"
+              variant="text"
+              size="small"
+              onClick={() => handleSavePartSet(row.id)}
+              style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+            >
+              保存
+            </Button>
+          );
+        }
+        return (
+          <Button
+            theme="danger"
+            variant="text"
+            size="small"
+            onClick={() => handleDeletePartSet(row.id)}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+          >
+            删除
+          </Button>
+        );
+      },
     },
   ];
 
@@ -137,9 +188,10 @@ const AddProductPage: React.FC = () => {
   const handleAddPartSet = () => {
     const newPartSet: IPartSet = {
       id: Date.now().toString(),
-      name: `部套${partSets.length + 1}`,
-      code: `PS${String(partSets.length + 1).padStart(3, '0')}`,
-      status: 'enabled',
+      name: '',
+      code: '',
+      status: true, // 默认启用
+      isEditing: true, // 新增时默认为编辑状态
     };
     setPartSets([...partSets, newPartSet]);
   };
@@ -149,15 +201,60 @@ const AddProductPage: React.FC = () => {
     setPartSets(partSets.filter(item => item.id !== id));
   };
 
+  // 保存部套
+  const handleSavePartSet = (id: string) => {
+    const partSet = partSets.find(item => item.id === id);
+    if (!partSet) return;
+
+    // 验证必填字段
+    if (!partSet.name.trim()) {
+      MessagePlugin.error('部套名称不能为空');
+      return;
+    }
+    if (!partSet.code.trim()) {
+      MessagePlugin.error('部套编号不能为空');
+      return;
+    }
+
+    // 检查编号是否重复
+    const isDuplicate = partSets.some(
+      item => item.id !== id && item.code === partSet.code
+    );
+    if (isDuplicate) {
+      MessagePlugin.error('部套编号已存在，请使用其他编号');
+      return;
+    }
+
+    // 保存成功，退出编辑状态
+    setPartSets(partSets.map(item => 
+      item.id === id ? { ...item, isEditing: false } : item
+    ));
+    MessagePlugin.success('保存成功');
+  };
+
+  // 处理部套字段变更
+  const handlePartSetFieldChange = (id: string, field: keyof IPartSet, value: any) => {
+    setPartSets(partSets.map(item => 
+      item.id === id ? { ...item, [field]: value } : item
+    ));
+  };
+
   // 表单提交
   const handleSubmit = async (e: SubmitContext) => {
     if (e.validateResult === true) {
+      // 检查是否有未保存的部套
+      const hasEditingPartSet = partSets.some(item => item.isEditing);
+      if (hasEditingPartSet) {
+        MessagePlugin.error('请先保存所有编辑中的部套');
+        return;
+      }
+
       setLoading(true);
       try {
         const formData = formRef.current?.getFieldsValue?.(true) as IProductForm;
         const submitData = {
           ...formData,
-          partSets,
+          partSets: partSets.map(({ isEditing, ...item }) => item), // 移除编辑状态字段
         };
         
         console.log('提交数据:', submitData);
@@ -262,8 +359,8 @@ const AddProductPage: React.FC = () => {
               </FormItem>
             </Col>
           </Row>
-
           {/* 部套列表部分 */}
+          {/* TODO: 处理部套列表的新增功能 - 需要完善部套管理相关功能 */}
           <div className={Style.titleBox}>
             <div className={Style.titleText}>部套列表</div>
           </div>

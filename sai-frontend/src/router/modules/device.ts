@@ -32,15 +32,14 @@ const result: IRouter[] = [
           title: '设备分类',
         },
       },
-      // 后续添加新增设备分类路由
-      // {
-      //   path: 'add-category',
-      //   Component: lazy(() => import('pages/Device/AddCategory')),
-      //   meta: {
-      //     title: '新增设备分类',
-      //     hidden: true,
-      //   },
-      // },
+      {
+        path: 'add-category',
+        Component: lazy(() => import('pages/Device/AddCategory')),
+        meta: {
+          title: '新增设备分类',
+          hidden: true,
+        },
+      },
     ],
   },
 ];

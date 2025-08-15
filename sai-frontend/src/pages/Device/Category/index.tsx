@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Button, Input, Row, Col, Pagination, Loading } from 'tdesign-react';
 import { SearchIcon } from 'tdesign-icons-react';
+import { useNavigate } from 'react-router-dom'; // 新增导入
 import { useAppDispatch, useAppSelector } from 'modules/store';
 import { getList, switchPageLoading, selectDeviceCategory } from 'modules/device/category';
 import CategoryCard from './components/CategoryCard';
@@ -8,6 +9,7 @@ import Style from './index.module.less';
 
 const DeviceCategory = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate(); // 新增
   const pageState = useAppSelector(selectDeviceCategory);
 
   const pageInit = async () => {
@@ -42,10 +44,15 @@ const DeviceCategory = () => {
     );
   };
 
+  // 新增分类处理函数
+  const handleAddCategory = () => {
+    navigate('/device/add-category');
+  };
+
   return (
     <div>
       <div className={Style.toolBar}>
-        <Button>新建分类</Button>
+        <Button onClick={handleAddCategory}>新建分类</Button>
         <Input className={Style.search} suffixIcon={<SearchIcon />} placeholder='请输入你需要搜索的内容' />
       </div>
       {pageState.pageLoading ? (
