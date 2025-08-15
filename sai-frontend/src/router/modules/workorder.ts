@@ -14,7 +14,15 @@ const result: IRouter[] = [
         path: 'io-check',
         Component: lazy(() => import('pages/IOInspection/List')),
         meta: {
-          title: 'IO点检',
+          title: 'I/O点检',
+        },
+      },
+      {
+        path: 'io-check/add',
+        Component: lazy(() => import('pages/IOInspection/AddIOInspection')),
+        meta: {
+          title: '新增I/O点检工单',
+          hidden: true,
         },
       },
       {
@@ -28,7 +36,7 @@ const result: IRouter[] = [
         path: 'no-load-check',
         Component: lazy(() => import('pages/Result/Maintenance')),
         meta: {
-          title: '空负荷联动',
+          title: '空载联动',  // 修改：空负荷联动 → 空载联动
         },
       },
       {

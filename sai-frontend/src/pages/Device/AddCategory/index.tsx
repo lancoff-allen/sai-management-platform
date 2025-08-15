@@ -92,7 +92,7 @@ const AddCategoryPage: React.FC = () => {
         >
           {/* 分类信息部分 */}
           <div className={Style.titleBox}>
-            <div className={Style.titleText}>分类信息</div>
+            <div className={Style.titleText}>设备分类信息</div>
           </div>
           
           <Row gutter={[32, 24]}>

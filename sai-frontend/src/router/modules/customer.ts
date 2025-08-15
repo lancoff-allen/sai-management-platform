@@ -17,6 +17,13 @@ const result: IRouter[] = [
           title: '客户列表',
         },
       },
+      {
+        path: 'add-customer',
+        Component: lazy(() => import('pages/Customer/AddCustomer')),
+        meta: {
+          title: '新增客户',
+        },
+      },
     ],
   },
 ];

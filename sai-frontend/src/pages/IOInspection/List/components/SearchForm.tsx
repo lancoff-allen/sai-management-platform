@@ -1,5 +1,6 @@
 import React, { useRef, memo } from 'react';
 import { Row, Col, Form, Input, Button, MessagePlugin, Select } from 'tdesign-react';
+import { useNavigate } from 'react-router-dom';
 import { WORK_ORDER_STATUS_OPTIONS, WorkOrderStatus } from 'services/ioInspection';
 import { FormInstanceFunctions, SubmitContext } from 'tdesign-react/es/form/type';
 
@@ -18,6 +19,7 @@ export type SearchFormProps = {
 
 const SearchForm: React.FC<SearchFormProps> = (props) => {
   const formRef = useRef<FormInstanceFunctions>();
+  const navigate = useNavigate();
   
   const onSubmit = (e: SubmitContext) => {
     if (e.validateResult === true) {
@@ -33,7 +35,7 @@ const SearchForm: React.FC<SearchFormProps> = (props) => {
   };
 
   const handleAdd = () => {
-    console.log('新增IO点检');
+    navigate('/workorder/io-check/add');
   };
 
   return (

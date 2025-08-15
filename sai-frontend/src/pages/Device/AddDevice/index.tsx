@@ -360,7 +360,6 @@ const AddProductPage: React.FC = () => {
             </Col>
           </Row>
           {/* 部套列表部分 */}
-          {/* TODO: 处理部套列表的新增功能 - 需要完善部套管理相关功能 */}
           <div className={Style.titleBox}>
             <div className={Style.titleText}>部套列表</div>
           </div>

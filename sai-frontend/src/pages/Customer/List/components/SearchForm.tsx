@@ -1,6 +1,7 @@
 import React, { useRef, memo } from 'react';
 import { Row, Col, Form, Input, Button, MessagePlugin } from 'tdesign-react';
 import { FormInstanceFunctions, SubmitContext } from 'tdesign-react/es/form/type';
+import { useNavigate } from 'react-router-dom';
 
 const { FormItem } = Form;
 
@@ -15,6 +16,7 @@ interface SearchFormProps {
 
 const SearchForm: React.FC<SearchFormProps> = (props) => {
   const formRef = useRef<FormInstanceFunctions>();
+  const navigate = useNavigate();
 
   const onSubmit = (e: SubmitContext) => {
     if (e.validateResult === true) {
@@ -31,7 +33,7 @@ const SearchForm: React.FC<SearchFormProps> = (props) => {
   };
 
   const handleAddCustomer = () => {
-    console.log('新增客户');
+    navigate('/customer/add-customer');
   };
 
   return (
