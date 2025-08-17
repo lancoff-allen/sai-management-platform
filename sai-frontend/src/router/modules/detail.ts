@@ -8,6 +8,7 @@ const result: IRouter[] = [
     meta: {
       title: '详情页',
       Icon: LayersIcon,
+      hidden: true,
     },
     children: [
       {

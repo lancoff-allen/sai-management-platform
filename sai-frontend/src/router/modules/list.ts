@@ -8,6 +8,7 @@ const result: IRouter[] = [
     meta: {
       title: '列表页',
       Icon: ViewModuleIcon,
+      hidden: true,
     },
     children: [
       {

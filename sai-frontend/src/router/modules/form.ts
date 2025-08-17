@@ -8,6 +8,7 @@ const result: IRouter[] = [
     meta: {
       title: '表单类',
       Icon: QueueIcon,
+      hidden: true,
     },
     children: [
       {
