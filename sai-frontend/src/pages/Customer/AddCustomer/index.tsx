@@ -9,6 +9,7 @@ import {
   Space,
   Select,
   Switch,
+  Textarea,
 } from 'tdesign-react';
 import { useNavigate } from 'react-router-dom';
 import { FormInstanceFunctions, SubmitContext } from 'tdesign-react/es/form/type';
@@ -94,6 +95,7 @@ interface ICustomerForm {
   province: string;
   city: string;
   district: string;
+  remark: string;
 }
 
 const INITIAL_DATA = {
@@ -103,107 +105,77 @@ const INITIAL_DATA = {
   province: '',
   city: '',
   district: '',
+  remark: '',
 };
 
 const AddCustomerPage: React.FC = () => {
   const navigate = useNavigate();
-  const [form] = Form.useForm(); // 使用 Form.useForm() 替代 formRef
+  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState(INITIAL_DATA);
-  const [availableCities, setAvailableCities] = useState<any[]>([]);
-  const [availableDistricts, setAvailableDistricts] = useState<any[]>([]);
+  const [country, setCountry] = useState(INITIAL_DATA.country);
+  const [province, setProvince] = useState(INITIAL_DATA.province);
+  const [city, setCity] = useState(INITIAL_DATA.city);
+
+  const availableCities = CITY_OPTIONS[province as keyof typeof CITY_OPTIONS] || [];
+  const availableDistricts = DISTRICT_OPTIONS[city as keyof typeof DISTRICT_OPTIONS] || [];
+  const isChinaSelected = country === 'china';
 
   // 处理国家变化
   const handleCountryChange = (value: any) => {
-    const countryValue = String(value); // 确保转换为字符串
-    setFormData(prev => ({
-      ...prev,
-      country: countryValue,
-      province: '',
-      city: '',
-      district: '',
-    }));
-    
-    // 重置省市区选择
-    form.setFieldsValue({
-      province: '',
-      city: '',
-      district: '',
-    });
-    
-    setAvailableCities([]);
-    setAvailableDistricts([]);
+    const countryValue = String(value);
+    setCountry(countryValue);
+    setProvince('');
+    setCity('');
+    form.setFieldsValue({ province: '', city: '', district: '' });
   };
 
   // 处理省份变化
   const handleProvinceChange = (value: any) => {
     const provinceValue = String(value);
-    setFormData(prev => ({
-      ...prev,
-      province: provinceValue,
-      city: '',
-      district: '',
-    }));
-    
-    // 重置市区选择
-    form.setFieldsValue({
-      city: '',
-      district: '',
-    });
-    
-    // 更新可用城市列表
-    const cities = CITY_OPTIONS[provinceValue as keyof typeof CITY_OPTIONS] || [];
-    setAvailableCities(cities);
-    setAvailableDistricts([]);
+    setProvince(provinceValue);
+    setCity('');
+    form.setFieldsValue({ city: '', district: '' });
   };
 
   // 处理城市变化
   const handleCityChange = (value: any) => {
     const cityValue = String(value);
-    setFormData(prev => ({
-      ...prev,
-      city: cityValue,
-      district: '',
-    }));
-    
-    // 重置区选择
-    form.setFieldsValue({
-      district: '',
-    });
-    
-    // 更新可用区县列表
-    const districts = DISTRICT_OPTIONS[cityValue as keyof typeof DISTRICT_OPTIONS] || [];
-    setAvailableDistricts(districts);
+    setCity(cityValue);
+    form.setFieldsValue({ district: '' });
   };
 
   // 表单提交
   const handleSubmit = async () => {
+    setLoading(true);
     try {
-      await form.validate(); // 使用 form.validate() 替代 formRef.current?.validateFields()
-      const values = form.getFieldsValue(true); // 获取表单值
+      await form.validate();
+      const values = form.getFieldsValue(true);
       
-      // 将状态字符串转换为布尔值
       const submitData = {
         ...values,
         status: values.status === 'true'
       };
       
       console.log('提交的客户数据:', submitData);
-      // 这里调用API提交数据
       
       MessagePlugin.success('客户添加成功！');
       navigate('/customer/list');
     } catch (error) {
-      console.error('表单验证失败:', error);
+      const firstError = Object.values(error as any)[0];
+      if (firstError) {
+        MessagePlugin.error((firstError as any).message);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   // 重置表单
   const handleReset = () => {
-    form.reset(); // 使用 form.reset() 替代 formRef.current?.reset?.()
-    setFormData(INITIAL_DATA);
-    setAvailableCities([]);
-    setAvailableDistricts([]);
+    form.reset();
+    setCountry(INITIAL_DATA.country);
+    setProvince(INITIAL_DATA.province);
+    setCity(INITIAL_DATA.city);
   };
 
   // 返回列表页
@@ -211,15 +183,13 @@ const AddCustomerPage: React.FC = () => {
     navigate('/customer/list');
   };
 
-  // 判断是否选择了中国
-  const isChinaSelected = formData.country === 'china';
-
   return (
     <div className={classnames(CommonStyle.pageWithColor)}>
       <div className={Style.formContainer}>
         <Form
           form={form}
           onSubmit={handleSubmit}
+          onReset={handleReset}
           labelWidth={100}
           labelAlign="top"
         >
@@ -310,7 +280,7 @@ const AddCustomerPage: React.FC = () => {
                   placeholder="请选择城市" 
                   filterable
                   clearable
-                  disabled={!isChinaSelected || !formData.province}
+                  disabled={!isChinaSelected || !province}
                   onChange={handleCityChange}
                 >
                   {availableCities.map((item) => (
@@ -330,7 +300,7 @@ const AddCustomerPage: React.FC = () => {
                   placeholder="请选择区县" 
                   filterable
                   clearable
-                  disabled={!isChinaSelected || !formData.city}
+                  disabled={!isChinaSelected || !city}
                 >
                   {availableDistricts.map((item) => (
                     <Option key={item.value} label={item.label} value={item.value} />
@@ -339,14 +309,22 @@ const AddCustomerPage: React.FC = () => {
               </FormItem>
             </Col>
           </Row>
-          {/* BUG: 按钮距离问题需要处理 */}
+
+          {/* 其他信息部分 */}
+          <div className={Style.titleBox}>
+            <div className={Style.titleText}>其他信息</div>
+          </div>
+          <FormItem label='备注' name='remark' initialData={INITIAL_DATA.remark}>
+            <Textarea placeholder='请输入备注信息' autosize={{ minRows: 4, maxRows: 6 }} />
+          </FormItem>
+
           {/* 操作按钮 */}
-          <FormItem>
+          <FormItem className={Style.buttonContainer}>
             <Space>
-              <Button type="submit" theme="primary" loading={loading}>
+              <Button type='submit' theme='primary' loading={loading}>
                 提交
               </Button>
-              <Button variant="base" theme="primary" onClick={handleReset}>
+              <Button type="reset" variant="base" theme="default">
                 重置
               </Button>
               <Button theme="default" onClick={handleBack}>

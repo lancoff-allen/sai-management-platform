@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   Form,
+  Row,
+  Col,
   Input,
   Button,
   Select,
@@ -118,41 +120,47 @@ const AddIOInspectionPage: React.FC = () => {
   return (
     <div className={`${CommonStyle.pageWithPadding} ${CommonStyle.pageWithColor}`}>
       <div className={Style.formContainer}>
-        <div className={Style.titleText}>I/O点检工单信息</div>
+        <div className={Style.titleText} style={{ marginBottom: 32 }}>I/O点检工单信息</div>
         
         <Form
           form={form}
-          colon
-          labelWidth={120}
+          labelAlign='top'
           style={{ width: '100%' }}
+          onReset={handleReset}
+          onSubmit={handleSubmit}
         >
-          <FormItem
-            label="设备编号"
-            name="deviceNumber"
-            rules={[
-              { required: true, message: '请选择设备编号' },
-            ]}
-          >
-            <Select
-              value={formData.deviceNumber}
-              onChange={handleDeviceChange}
-              placeholder="请选择设备编号"
-              filterable
-              clearable
-              options={DEVICE_OPTIONS}
-            />
-          </FormItem>
-
-          <FormItem
-            label="客户名称"
-            name="customerName"
-          >
-            <Input
-              value={formData.customerName}
-              placeholder="根据设备编号自动填充"
-              disabled
-            />
-          </FormItem>
+          <Row gutter={[32, 24]}>
+            <Col span={6}>
+              <FormItem
+                label="设备编号"
+                name="deviceNumber"
+                rules={[
+                  { required: true, message: '请选择设备编号' },
+                ]}
+              >
+                <Select
+                  value={formData.deviceNumber}
+                  onChange={handleDeviceChange}
+                  placeholder="请选择设备编号"
+                  filterable
+                  clearable
+                  options={DEVICE_OPTIONS}
+                />
+              </FormItem>
+            </Col>
+            <Col span={6}>
+              <FormItem
+                label="客户名称"
+                name="customerName"
+              >
+                <Input
+                  value={formData.customerName}
+                  placeholder="根据设备编号自动填充"
+                  disabled
+                />
+              </FormItem>
+            </Col>
+          </Row>
 
           <FormItem
             label="文件导入"
@@ -178,19 +186,19 @@ const AddIOInspectionPage: React.FC = () => {
             />
           </FormItem>
 
-          <FormItem>
-            <Space size="large" style={{ marginTop: '32px' }}>
+          <FormItem className={Style.buttonContainer}>
+            <Space size="large">
               <Button
                 theme="primary"
-                onClick={handleSubmit}
+                type='submit'
                 loading={loading}
               >
                 提交
               </Button>
               <Button
-                theme="primary"
+                theme="default"
                 variant="base"
-                onClick={handleReset}
+                type='reset'
               >
                 重置
               </Button>

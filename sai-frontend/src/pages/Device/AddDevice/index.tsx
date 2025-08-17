@@ -84,7 +84,7 @@ const INITIAL_DATA = {
 
 const AddProductPage: React.FC = () => {
   const navigate = useNavigate();
-  const formRef = useRef<FormInstanceFunctions>();
+  const [form] = Form.useForm();
   const [partSets, setPartSets] = useState<IPartSet[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -240,41 +240,43 @@ const AddProductPage: React.FC = () => {
   };
 
   // 表单提交
-  const handleSubmit = async (e: SubmitContext) => {
-    if (e.validateResult === true) {
-      // 检查是否有未保存的部套
-      const hasEditingPartSet = partSets.some(item => item.isEditing);
-      if (hasEditingPartSet) {
-        MessagePlugin.error('请先保存所有编辑中的部套');
-        return;
-      }
+  const handleSubmit = async () => {
+    // 检查是否有未保存的部套
+    const hasEditingPartSet = partSets.some(item => item.isEditing);
+    if (hasEditingPartSet) {
+      MessagePlugin.error('请先保存所有编辑中的部套');
+      return;
+    }
 
-      setLoading(true);
-      try {
-        const formData = formRef.current?.getFieldsValue?.(true) as IProductForm;
-        const submitData = {
-          ...formData,
-          partSets: partSets.map(({ isEditing, ...item }) => item), // 移除编辑状态字段
-        };
-        
-        console.log('提交数据:', submitData);
-        // 这里调用API保存数据
-        // await createProduct(submitData);
-        
-        MessagePlugin.success('产品创建成功');
-        // 返回设备列表页面
-        navigate('/device/list');
-      } catch (error) {
-        MessagePlugin.error('创建失败，请重试');
-      } finally {
-        setLoading(false);
+    setLoading(true);
+    try {
+      await form.validate();
+      const formData = form.getFieldsValue(true) as IProductForm;
+      const submitData = {
+        ...formData,
+        partSets: partSets.map(({ isEditing, ...item }) => item), // 移除编辑状态字段
+      };
+      
+      console.log('提交数据:', submitData);
+      // 这里调用API保存数据
+      // await createProduct(submitData);
+      
+      MessagePlugin.success('产品创建成功');
+      // 返回设备列表页面
+      navigate('/device/list');
+    } catch (error) {
+      const firstError = Object.values(error as any)[0];
+      if (firstError) {
+        MessagePlugin.error((firstError as any).message);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   // 重置表单
   const handleReset = () => {
-    formRef.current?.reset?.();
+    form.reset();
     setPartSets([]);
   };
 
@@ -287,10 +289,11 @@ const AddProductPage: React.FC = () => {
     <div className={classnames(CommonStyle.pageWithColor)}>
       <div className={Style.formContainer}>
         <Form
-          ref={formRef}
+          form={form}
           onSubmit={handleSubmit}
           labelWidth={100}
           labelAlign="top"
+          onReset={handleReset}
         >
           {/* 设备信息部分 */}
           <div className={Style.titleBox}>
@@ -372,7 +375,6 @@ const AddProductPage: React.FC = () => {
                 </Button>
               </Space>
             </div>
-            
             <Table
               data={partSets}
               columns={partSetColumns}
@@ -395,12 +397,12 @@ const AddProductPage: React.FC = () => {
           </FormItem>
 
           {/* 操作按钮 */}
-          <FormItem>
+          <FormItem className={Style.buttonContainer}>
             <Space>
               <Button type="submit" theme="primary" loading={loading}>
                 提交
               </Button>
-              <Button type="reset" onClick={handleReset}>
+              <Button type="reset" variant="base" theme="default">
                 重置
               </Button>
               <Button theme="default" onClick={handleBack}>
