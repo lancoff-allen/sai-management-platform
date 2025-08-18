@@ -1,6 +1,8 @@
 spring:
   application:
     name: sai-backend
+  main:
+    allow-bean-definition-overriding: true
   
   # 数据库配置
   datasource:
@@ -50,16 +52,18 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: alpha
     display-request-duration: true
-    display-operation-id: true
+    # 删除这行重复的配置
+    # display-operation-id: true
+    # 添加以下配置优化布局
+    doc-expansion: none
+    default-models-expand-depth: 1
+    default-model-expand-depth: 1
+    display-operation-id: true  # 改为 true
+    show-extensions: true
+    show-common-extensions: true
   show-actuator: false
   group-configs:
     - group: 'default'
       display-name: 'SAI Management Platform API'
       paths-to-match: '/**'
       packages-to-scan: 'com.sai.backend.controller'
-
-# 日志配置
-logging:
-  level:
-    com.sai.backend: debug
-    org.springframework.security: debug
