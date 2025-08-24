@@ -95,6 +95,9 @@ interface ICustomerForm {
   province: string;
   city: string;
   district: string;
+  contactPerson: string;    // 新增：联系人
+  contactPhone: string;     // 新增：联系电话（必填）
+  contactEmail: string;     // 新增：联系邮箱
   remark: string;
 }
 
@@ -105,6 +108,9 @@ const INITIAL_DATA = {
   province: '',
   city: '',
   district: '',
+  contactPerson: '',        // 新增
+  contactPhone: '',         // 新增
+  contactEmail: '',         // 新增
   remark: '',
 };
 
@@ -314,9 +320,62 @@ const AddCustomerPage: React.FC = () => {
           <div className={Style.titleBox}>
             <div className={Style.titleText}>其他信息</div>
           </div>
-          <FormItem label='备注' name='remark' initialData={INITIAL_DATA.remark}>
-            <Textarea placeholder='请输入备注信息' autosize={{ minRows: 4, maxRows: 6 }} />
-          </FormItem>
+          
+          <Row gutter={[32, 24]}>
+            <Col span={6}>
+              <FormItem
+                label="联系人"
+                name="contactPerson"
+                initialData={INITIAL_DATA.contactPerson}
+              >
+                <Input placeholder="请输入联系人姓名" />
+              </FormItem>
+            </Col>
+            <Col span={6}>
+              <FormItem
+                label="联系电话"
+                name="contactPhone"
+                initialData={INITIAL_DATA.contactPhone}
+                rules={[
+                  { required: true, message: '联系电话必填', type: 'error' },
+                  { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', type: 'error' }
+                ]}
+              >
+                <Input placeholder="请输入联系电话" />
+              </FormItem>
+            </Col>
+            <Col span={6}>
+              <FormItem
+                label="联系邮箱"
+                name="contactEmail"
+                initialData={INITIAL_DATA.contactEmail}
+                rules={[
+                  { 
+                    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, 
+                    message: '请输入正确的邮箱地址', 
+                    type: 'warning' 
+                  }
+                ]}
+              >
+                <Input placeholder="请输入联系邮箱" />
+              </FormItem>
+            </Col>
+          </Row>
+          
+          <Row gutter={[32, 24]}>
+            <Col span={12}>
+              <FormItem 
+                label='备注' 
+                name='remark' 
+                initialData={INITIAL_DATA.remark}
+                style={{ marginTop: '24px', marginBottom: '24px' }}
+              >
+                <Textarea placeholder='请输入备注信息' autosize={{ minRows: 4, maxRows: 6 }} />
+              </FormItem>
+
+              {/* 操作按钮 */}
+            </Col>
+          </Row>
 
           {/* 操作按钮 */}
           <FormItem className={Style.buttonContainer}>

@@ -21,7 +21,7 @@ const StatusMap = {
 export const DeviceListTable = () => {
   const dispatch = useAppDispatch();
   const pageState = useAppSelector(selectDeviceList);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>([]); // 改回 (string | number)[]
   const [visible, setVisible] = useState(false);
   const [searchParams, setSearchParams] = useState<FormValueType>({});
   const { loading, deviceList, current, pageSize, total } = pageState;
@@ -38,7 +38,7 @@ export const DeviceListTable = () => {
     };
   }, []);
 
-  const onSelectChange = (value: (string | number)[]) => {
+  const onSelectChange = (value: (string | number)[]) => { // 改回 (string | number)[]
     setSelectedRowKeys(value);
   };
 

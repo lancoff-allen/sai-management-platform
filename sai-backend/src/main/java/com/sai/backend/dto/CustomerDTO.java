@@ -2,11 +2,11 @@ package com.sai.backend.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import java.util.UUID; // 添加 UUID 导入
 
 @Data
 public class CustomerDTO {
-    
-    private Long id;
+    private UUID id; // 从 Long 改为 UUID
     
     @NotBlank(message = "客户名称不能为空")
     @Size(max = 100, message = "客户名称长度不能超过100个字符")

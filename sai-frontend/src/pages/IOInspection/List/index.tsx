@@ -17,7 +17,7 @@ const StatusMap = {
 export const IOInspectionListTable = () => {
   const [loading, setLoading] = useState(false);
   const [dataSource, setDataSource] = useState<IIOInspection[]>([]);
-  const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>([]);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>([]); // 改回 (string | number)[]
   const [visible, setVisible] = useState(false);
   const [searchParams, setSearchParams] = useState<FormValueType>({});
   const [pagination, setPagination] = useState({
@@ -47,7 +47,7 @@ export const IOInspectionListTable = () => {
     fetchData();
   }, []);
 
-  const onSelectChange = (value: (string | number)[]) => {
+  const onSelectChange = (value: (string | number)[]) => { // 改回 (string | number)[]
     setSelectedRowKeys(value);
   };
 

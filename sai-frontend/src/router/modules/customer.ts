@@ -22,6 +22,7 @@ const result: IRouter[] = [
         Component: lazy(() => import('pages/Customer/AddCustomer')),
         meta: {
           title: '新增客户',
+          hidden: true,  // 添加这行，隐藏菜单项
         },
       },
     ],

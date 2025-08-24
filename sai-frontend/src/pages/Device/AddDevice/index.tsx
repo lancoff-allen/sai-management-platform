@@ -66,19 +66,19 @@ interface IPartSet {
 
 // 表单数据类型定义
 interface IProductForm {
-  deviceNumber: string; // 改为设备编号
-  categoryId: number;
-  customerName: string; // 新增客户信息
-  projectManager: string; // 新增项目经理
+  deviceNumber: string;
+  categoryId: string; // 从 number 改为 string
+  customerName: string;
+  projectManager: string;
   partSets: IPartSet[];
   remark: string;
 }
 
 const INITIAL_DATA = {
-  deviceNumber: '', // 改为设备编号
-  categoryId: undefined,
-  customerName: '', // 新增客户信息初始值
-  projectManager: '', // 新增项目经理初始值
+  deviceNumber: '',
+  categoryId: '', // 从 undefined 改为 ''
+  customerName: '',
+  projectManager: '',
   remark: '',
 };
 

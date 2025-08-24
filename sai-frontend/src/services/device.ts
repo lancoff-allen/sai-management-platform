@@ -1,7 +1,7 @@
 import request from 'utils/request';
 
 export interface IDeviceCategory {
-  id: number;
+  id: string;  // 改为 string 类型
   name: string;
   description: string;
   type: number;
@@ -23,7 +23,7 @@ export const getDeviceCategoryList = async (params: IParams) => {
   // 模拟数据
   const mockData: IDeviceCategory[] = [
     {
-      id: 1,
+      id: '1',
       name: 'PS2A 乘用子午胎一次法成型机',
       description: 'PS2A乘用子午胎一次法成型机是具有高产出、高轮胎质量、换型速度快、生产规格范围大等优点的高自动化半钢成型机',
       type: 1,
@@ -32,7 +32,7 @@ export const getDeviceCategoryList = async (params: IParams) => {
       createTime: '2024-01-15 10:30:00'
     },
     {
-      id: 2,
+      id: '2',
       name: 'TPRO-S全钢子午胎一次法三鼓成型机',
       description: '输送准、贴合精、接头好、传递准、滚压实',
       type: 2,
@@ -41,7 +41,7 @@ export const getDeviceCategoryList = async (params: IParams) => {
       createTime: '2024-01-10 14:20:00'
     },
     {
-      id: 3,
+      id: '3',
       name: 'NTS3 全钢子午胎一次法三鼓成型机',
       description: '胶囊寿命提高3倍以上，远程运维，提效增产',
       type: 3,
@@ -50,7 +50,7 @@ export const getDeviceCategoryList = async (params: IParams) => {
       createTime: '2024-01-08 09:15:00'
     },
     {
-      id: 4,
+      id: '4',
       name: 'FAR20-S 全自动小料配料称量系统',
       description: '软控研发的智能全自动小料配料称量系统，其性能均满足国际国内高端客户要求，具有高产能、高精度、支持快速交付等特点',
       type: 4,
@@ -59,7 +59,7 @@ export const getDeviceCategoryList = async (params: IParams) => {
       createTime: '2024-01-05 16:45:00'
     },
     {
-      id: 5,
+      id: '5',
       name: '15°-70°钢丝帘布裁断机',
       description: '15°-70°钢丝帘布裁断机，提供带束层制品完善的解决方案，最高的效率、制品质量及精度，满足客户个性化定制及需求',
       type: 5,
@@ -68,7 +68,7 @@ export const getDeviceCategoryList = async (params: IParams) => {
       createTime: '2024-01-03 11:30:00'
     },
     {
-      id: 6,
+      id: '6',
       name: '内衬层挤出压延生产线',
       description: '软控自主研发的内衬层生产线已形成系列化，涵盖全钢、半钢、工程胎、摩托车胎四大系列',
       type: 6,
@@ -111,13 +111,15 @@ export const DEVICE_STATUS_OPTIONS = [
 
 // 设备接口
 export interface IDevice {
-  id: number;
+  id: string; // 从 number 改为 string
   deviceNumber: string;
-  status: DeviceStatus;
-  projectManager: string;
-  categoryId: number;
+  categoryId: string; // 从 number 改为 string
   categoryName: string;
+  customerName: string;
+  projectManager: string;
+  status: DeviceStatus;
   createTime: string;
+  remark?: string;
   updateTime: string;
 }
 
@@ -135,82 +137,90 @@ export const getDeviceList = async (params: IDeviceListParams) => {
   // 模拟数据
   const mockData: IDevice[] = [
     {
-      id: 1,
+      id: '1',
       deviceNumber: 'DEV-2024-001',
       status: DeviceStatus.INSTALLED,
       projectManager: '黄桂菊',
-      categoryId: 1,
+      categoryId: '1',
       categoryName: 'PS2A 乘用子午胎一次法成型机',
+      customerName: '轮胎制造有限公司', // 添加缺失的 customerName 字段
       createTime: '2024-01-15 10:30:00',
       updateTime: '2024-01-20 14:20:00'
     },
     {
-      id: 2,
+      id: '2',
       deviceNumber: 'DEV-2024-002',
       status: DeviceStatus.DEBUGGING,
       projectManager: '魏小凯',
-      categoryId: 2,
+      categoryId: '2',
       categoryName: 'TPRO-S全钢子午胎一次法三鼓成型机',
+      customerName: '橡胶工业集团', // 添加缺失的 customerName 字段
       createTime: '2024-01-10 14:20:00',
       updateTime: '2024-01-18 09:15:00'
     },
     {
-      id: 3,
+      id: '3', // 从 3 改为 '3'
       deviceNumber: 'DEV-2024-003',
       status: DeviceStatus.TESTED,
       projectManager: '王五',
-      categoryId: 3,
+      categoryId: '3', // 从 3 改为 '3'
       categoryName: 'NTS3 全钢子午胎一次法三鼓成型机',
+      customerName: '汽车轮胎股份公司', // 添加缺失的 customerName 字段
       createTime: '2024-01-08 09:15:00',
       updateTime: '2024-01-22 16:30:00'
     },
     {
-      id: 4,
+      id: '4', // 从 4 改为 '4'
       deviceNumber: 'DEV-2024-004',
       status: DeviceStatus.INSTALLING,
       projectManager: '赵六',
-      categoryId: 4,
+      categoryId: '4', // 从 4 改为 '4'
       categoryName: 'FAR20-S 全自动小料配料称量系统',
+      customerName: '化工材料有限公司', // 添加缺失的 customerName 字段
       createTime: '2024-01-05 16:45:00',
       updateTime: '2024-01-15 11:20:00'
     },
     {
-      id: 5,
+      id: '5', // 从 5 改为 '5'
       deviceNumber: 'DEV-2024-005',
       status: DeviceStatus.SHIPPED,
       projectManager: '孙七',
-      categoryId: 5,
+      categoryId: '5', // 从 5 改为 '5'
       categoryName: '15°-70°钢丝帘布裁断机',
+      customerName: '钢丝制品厂', // 添加缺失的 customerName 字段
       createTime: '2024-01-03 11:30:00',
       updateTime: '2024-01-25 08:45:00'
     },
     {
-      id: 6,
+      id: '6', // 从 6 改为 '6'
       deviceNumber: 'DEV-2024-006',
       status: DeviceStatus.NOT_INSTALLED,
       projectManager: '周八',
-      categoryId: 6,
+      categoryId: '6', // 从 6 改为 '6'
       categoryName: '内衬层挤出压延生产线',
+      customerName: '塑料制品公司', // 添加缺失的 customerName 字段
       createTime: '2024-01-01 08:00:00',
       updateTime: '2024-01-12 13:15:00'
     },
     {
-      id: 7,
+      id: '7', // 从 7 改为 '7'
       deviceNumber: 'DEV-2024-007',
       status: DeviceStatus.INSTALLED,
       projectManager: '吴九',
-      categoryId: 1,
+      categoryId: '1',
       categoryName: 'PS2A 乘用子午胎一次法成型机',
+      customerName: '轮胎制造有限公司', // 添加缺失的 customerName 字段
       createTime: '2024-01-20 15:30:00',
       updateTime: '2024-01-28 10:20:00'
     },
     {
-      id: 8,
+      id: '8', // 从 8 改为 '8'
       deviceNumber: 'DEV-2024-008',
       status: DeviceStatus.DEBUGGING,
       projectManager: '郑十',
-      categoryId: 2,
+      categoryId: '2',
       categoryName: 'TPRO-S全钢子午胎一次法三鼓成型机',
+      customerName: '橡胶工业集团', // 添加缺失的 customerName 字段
       createTime: '2024-01-18 12:45:00',
       updateTime: '2024-01-30 14:30:00'
     }

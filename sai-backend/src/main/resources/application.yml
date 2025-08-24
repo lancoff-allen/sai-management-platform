@@ -34,6 +34,10 @@ spring:
           max-active: 8
           max-idle: 8
           min-idle: 0
+  
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 0
 
 # 服务器配置
 server:
@@ -67,3 +71,8 @@ springdoc:
       display-name: 'SAI Management Platform API'
       paths-to-match: '/**'
       packages-to-scan: 'com.sai.backend.controller'
+
+# JWT 配置
+jwt:
+  secret: ${JWT_SECRET:myVeryLongSecretKeyThatIsAtLeast256BitsLongForJWTHMACSHAAlgorithmSecurity123456789}
+  expiration: ${JWT_EXPIRATION:86400} # 24小时，单位：秒

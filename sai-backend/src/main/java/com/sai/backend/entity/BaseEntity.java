@@ -1,30 +1,17 @@
 package com.sai.backend.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
 import lombok.Data;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import lombok.EqualsAndHashCode;
 
-import java.time.LocalDateTime;
+import java.util.UUID; // 添加UUID导入
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @MappedSuperclass
-@EntityListeners(AuditingEntityListener.class)
-public abstract class BaseEntity {
+public abstract class BaseEntity extends AbstractEntity {
     
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @CreatedDate
-    @Column(name = "create_time", updatable = false)
-    private LocalDateTime createTime;
-    
-    @LastModifiedDate
-    @Column(name = "update_time")
-    private LocalDateTime updateTime;
-    
-    @Column(name = "deleted", nullable = false)
-    private Boolean deleted = false;
+    @Column(name = "tenant_id", nullable = false)
+    private UUID tenantId; // 改为UUID类型
 }

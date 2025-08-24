@@ -21,7 +21,7 @@ export interface IIOInspection {
   id: number;
   deviceName: string;
   workOrderStatus: WorkOrderStatus;
-  progress: number; // 完成进度 0-100
+  progress: number;
   customerName: string;
   createTime: string;
   updateTime: string;

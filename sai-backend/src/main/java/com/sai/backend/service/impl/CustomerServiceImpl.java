@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID; // 添加 UUID 导入
 
 @Slf4j
 @Service
@@ -23,11 +24,15 @@ public class CustomerServiceImpl implements CustomerService {
     
     @Override
     @Transactional
-    public Customer createCustomer(CustomerDTO customerDTO) {
-        log.info("创建客户：{}", customerDTO.getCustomerName());
+    public Customer createCustomer(CustomerDTO customerDTO, UUID tenantId) {
+        log.info("创建客户：{}, 租户：{}", customerDTO.getCustomerName(), tenantId);
         
         Customer customer = new Customer();
-        BeanUtils.copyProperties(customerDTO, customer);
+        // 排除 id 字段，让 JPA 自动生成 UUID
+        BeanUtils.copyProperties(customerDTO, customer, "id");
+        
+        // 设置租户ID
+        customer.setTenantId(tenantId);
         
         // 设置默认状态为启用
         if (customer.getStatus() == null) {
@@ -38,63 +43,63 @@ public class CustomerServiceImpl implements CustomerService {
     }
     
     @Override
-    public Customer getCustomerById(Long id) {
-        log.info("根据ID获取客户：{}", id);
-        return customerRepository.findByIdAndDeletedFalse(id)
+    public Customer getCustomerById(UUID id, UUID tenantId) {
+        log.info("根据ID获取客户：{}, 租户：{}", id, tenantId);
+        return customerRepository.findByIdAndTenantIdAndDeletedFalse(id, tenantId)
                 .orElseThrow(() -> new RuntimeException("客户不存在或已删除"));
     }
     
     @Override
     @Transactional
-    public Customer updateCustomer(Long id, CustomerDTO customerDTO) {
-        log.info("更新客户信息：{}", id);
+    public Customer updateCustomer(UUID id, CustomerDTO customerDTO, UUID tenantId) {
+        log.info("更新客户信息：{}, 租户：{}", id, tenantId);
         
-        Customer existingCustomer = getCustomerById(id);
+        Customer existingCustomer = getCustomerById(id, tenantId);
         
-        // 复制属性，排除id和时间字段
-        BeanUtils.copyProperties(customerDTO, existingCustomer, "id", "createTime", "updateTime", "deleted");
+        // 复制属性，排除id、时间字段和租户字段
+        BeanUtils.copyProperties(customerDTO, existingCustomer, "id", "createTime", "updateTime", "deleted", "tenantId");
         
         return customerRepository.save(existingCustomer);
     }
     
     @Override
-    @Transactional
-    public void deleteCustomer(Long id) {
-        log.info("删除客户：{}", id);
+    public List<Customer> getAllCustomers(UUID tenantId) {
+        log.info("获取所有客户列表，租户：{}", tenantId);
+        return customerRepository.findByTenantIdAndDeletedFalseOrderByCreateTimeDesc(tenantId);
+    }
+    
+    @Override
+    public Page<Customer> getCustomersPage(UUID tenantId, Pageable pageable) {
+        log.info("分页查询客户，租户：{}", tenantId);
+        return customerRepository.findByTenantIdAndDeletedFalse(tenantId, pageable);
+    }
+    
+    @Override
+    public Page<Customer> searchCustomers(UUID tenantId, String name, String contactPerson, String phone, Integer status, Pageable pageable) {
+        log.info("条件查询客户 - 租户：{}, name: {}, contactPerson: {}, phone: {}, status: {}", tenantId, name, contactPerson, phone, status);
         
-        Customer customer = getCustomerById(id);
-        customer.setDeleted(true);
-        customerRepository.save(customer);
-    }
-    
-    @Override
-    public List<Customer> getAllCustomers() {
-        log.info("获取所有客户列表");
-        return customerRepository.findByDeletedFalseOrderByCreateTimeDesc();
-    }
-    
-    @Override
-    public Page<Customer> getCustomersPage(Pageable pageable) {
-        log.info("分页查询客户");
-        return customerRepository.findByDeletedFalse(pageable);
-    }
-    
-    @Override
-    public Page<Customer> searchCustomers(String name, String contactPerson, String phone, Integer status, Pageable pageable) {
-        log.info("条件查询客户 - name: {}, contactPerson: {}, phone: {}, status: {}", name, contactPerson, phone, status);
-        
-        // 注意：这里需要修改Repository中的查询，因为实体字段名已经改变
-        return customerRepository.findByConditions(name, contactPerson, phone, status, pageable);
+        return customerRepository.findByTenantIdAndConditions(tenantId, name, contactPerson, phone, status, pageable);
     }
     
     @Override
     @Transactional
-    public Customer toggleCustomerStatus(Long id) {
-        log.info("切换客户状态：{}", id);
+    public Customer toggleCustomerStatus(UUID id, UUID tenantId) {
+        log.info("切换客户状态：{}, 租户：{}", id, tenantId);
         
-        Customer customer = getCustomerById(id);
+        Customer customer = getCustomerById(id, tenantId);
         customer.setStatus(!customer.getStatus());
         
         return customerRepository.save(customer);
+    }
+    
+    @Override
+    @Transactional
+    public void deleteCustomer(UUID id, UUID tenantId) {
+        log.info("删除客户：{}, 租户：{}", id, tenantId);
+        
+        Customer customer = getCustomerById(id, tenantId);
+        customer.setDeleted(true);
+        
+        customerRepository.save(customer);
     }
 }

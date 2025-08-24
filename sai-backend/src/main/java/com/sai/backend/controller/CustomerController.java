@@ -19,6 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Slf4j
 @RestController
 @RequestMapping("/customers")
@@ -27,6 +29,12 @@ import org.springframework.web.bind.annotation.*;
 public class CustomerController {
     
     private final CustomerService customerService;
+    
+    // 获取当前租户ID的辅助方法
+    private UUID getCurrentTenantId() {
+        // 暂时硬编码租户ID，后续从认证上下文中获取
+        return UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+    }
     
     @Operation(summary = "分页查询客户列表", description = "支持按客户名称和国家进行筛选的分页查询")
     @ApiResponses(value = {
@@ -47,15 +55,17 @@ public class CustomerController {
         
         log.info("查询客户列表 - pageSize: {}, current: {}, name: {}, country: {}", pageSize, current, name, country);
         
+        UUID tenantId = getCurrentTenantId();
+        
         // 创建分页对象，注意current从1开始，需要转换为从0开始
         Pageable pageable = PageRequest.of(current - 1, pageSize, Sort.by(Sort.Direction.DESC, "createTime"));
         
         Page<Customer> customerPage;
         if (name != null || country != null) {
-            // 条件查询（这里简化处理，实际可能需要更复杂的查询逻辑）
-            customerPage = customerService.searchCustomers(name, null, null, null, pageable);
+            // 条件查询
+            customerPage = customerService.searchCustomers(tenantId, name, country, null, pageSize, pageable);
         } else {
-            customerPage = customerService.getCustomersPage(pageable);
+            customerPage = customerService.getCustomersPage(tenantId, pageable);
         }
         
         PageResult<Customer> pageResult = PageResult.of(customerPage.getContent(), customerPage.getTotalElements());
@@ -74,7 +84,8 @@ public class CustomerController {
             @Valid @RequestBody CustomerDTO customerDTO) {
         log.info("新增客户：{}", customerDTO.getCustomerName());
         
-        Customer customer = customerService.createCustomer(customerDTO);
+        UUID tenantId = getCurrentTenantId();
+        Customer customer = customerService.createCustomer(customerDTO, tenantId);
         return Result.success("客户创建成功", customer);
     }
     
@@ -85,12 +96,11 @@ public class CustomerController {
         @ApiResponse(responseCode = "500", description = "服务器内部错误")
     })
     @GetMapping("/{id}")
-    public Result<Customer> getCustomerById(
-            @Parameter(description = "客户ID", example = "1", required = true)
-            @PathVariable Long id) {
+    public Result<Customer> getCustomerById(@PathVariable UUID id) {
         log.info("查询客户详情：{}", id);
         
-        Customer customer = customerService.getCustomerById(id);
+        UUID tenantId = getCurrentTenantId();
+        Customer customer = customerService.getCustomerById(id, tenantId);
         return Result.success(customer);
     }
     
@@ -103,13 +113,14 @@ public class CustomerController {
     })
     @PutMapping("/{id}")
     public Result<Customer> updateCustomer(
-            @Parameter(description = "客户ID", example = "1", required = true)
-            @PathVariable Long id, 
+            @Parameter(description = "客户ID", example = "550e8400-e29b-41d4-a716-446655440000", required = true)
+            @PathVariable UUID id,
             @Parameter(description = "更新的客户信息", required = true)
             @Valid @RequestBody CustomerDTO customerDTO) {
         log.info("更新客户：{}", id);
         
-        Customer customer = customerService.updateCustomer(id, customerDTO);
+        UUID tenantId = getCurrentTenantId();
+        Customer customer = customerService.updateCustomer(id, customerDTO, tenantId);
         return Result.success("客户更新成功", customer);
     }
     
@@ -121,11 +132,12 @@ public class CustomerController {
     })
     @DeleteMapping("/{id}")
     public Result<Void> deleteCustomer(
-            @Parameter(description = "客户ID", example = "1", required = true)
-            @PathVariable Long id) {
+            @Parameter(description = "客户ID", example = "550e8400-e29b-41d4-a716-446655440000", required = true)
+            @PathVariable UUID id) {
         log.info("删除客户：{}", id);
         
-        customerService.deleteCustomer(id);
+        UUID tenantId = getCurrentTenantId();
+        customerService.deleteCustomer(id, tenantId);
         return Result.success("客户删除成功", null);
     }
     
@@ -137,11 +149,12 @@ public class CustomerController {
     })
     @PutMapping("/{id}/toggle-status")
     public Result<Customer> toggleCustomerStatus(
-            @Parameter(description = "客户ID", example = "1", required = true)
-            @PathVariable Long id) {
+            @Parameter(description = "客户ID", example = "550e8400-e29b-41d4-a716-446655440000", required = true)
+            @PathVariable UUID id) {
         log.info("切换客户状态：{}", id);
         
-        Customer customer = customerService.toggleCustomerStatus(id);
+        UUID tenantId = getCurrentTenantId();
+        Customer customer = customerService.toggleCustomerStatus(id, tenantId);
         return Result.success("客户状态更新成功", customer);
     }
 }
