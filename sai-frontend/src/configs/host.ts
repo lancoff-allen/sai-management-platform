@@ -4,8 +4,8 @@ export default {
     API: '',
   },
   development: {
-    // 开发环境接口请求
-    API: 'https://service-exndqyuk-1257786608.gz.apigw.tencentcs.com',
+    // 开发环境接口请求 - 修改为本地后端地址
+    API: 'http://localhost:8080/api',
   },
   test: {
     // 测试环境接口地址

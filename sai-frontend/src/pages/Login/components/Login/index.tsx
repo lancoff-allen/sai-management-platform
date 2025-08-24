@@ -1,36 +1,65 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Form, MessagePlugin, Input, Checkbox, Button, FormInstanceFunctions, SubmitContext } from 'tdesign-react';
+import { Form, MessagePlugin, Input, Checkbox, Button, Select, FormInstanceFunctions, SubmitContext } from 'tdesign-react';
 import { LockOnIcon, UserIcon, BrowseOffIcon, BrowseIcon, RefreshIcon } from 'tdesign-icons-react';
 import classnames from 'classnames';
 import QRCode from 'qrcode.react';
 import { useAppDispatch } from 'modules/store';
 import { login } from 'modules/user';
+import { getTenantsApi, TenantInfo } from 'services/auth';
 import useCountdown from '../../hooks/useCountDown';
 
 import Style from './index.module.less';
 
 const { FormItem } = Form;
+const { Option } = Select;
 
 export type ELoginType = 'password' | 'phone' | 'qrcode';
 
 export default function Login() {
   const [loginType, changeLoginType] = useState<ELoginType>('password');
   const [showPsw, toggleShowPsw] = useState(false);
+  const [tenants, setTenants] = useState<TenantInfo[]>([]);
+  const [loadingTenants, setLoadingTenants] = useState(false);
   const { countdown, setupCountdown } = useCountdown(60);
   const formRef = useRef<FormInstanceFunctions>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
+  // 组件加载时获取租户列表
+  useEffect(() => {
+    const fetchTenants = async () => {
+      try {
+        setLoadingTenants(true);
+        const tenantList = await getTenantsApi();
+        setTenants(tenantList);
+      } catch (error) {
+        console.error('获取租户列表失败:', error);
+        MessagePlugin.error('获取租户列表失败');
+      } finally {
+        setLoadingTenants(false);
+      }
+    };
+
+    fetchTenants();
+  }, []);
+
   const onSubmit = async (e: SubmitContext) => {
     if (e.validateResult === true) {
       try {
         const formValue = formRef.current?.getFieldsValue?.(true) || {};
-        await dispatch(login(formValue));
-
+        
+        // 确保数据结构符合登录函数的期望
+        const loginData = {
+          account: formValue.account || '',
+          password: formValue.password || '',
+          tenantCode: formValue.tenantCode || ''
+        };
+        
+        await dispatch(login(loginData));
+    
         MessagePlugin.success('登录成功');
-
-        navigate('/dashboard/base');
+        navigate('/dashboard');
       } catch (e) {
         console.log(e);
         MessagePlugin.error('登录失败');
@@ -54,14 +83,14 @@ export default function Login() {
         {loginType === 'password' && (
           <>
             <FormItem name='account' rules={[{ required: true, message: '账号必填', type: 'error' }]}>
-              <Input size='large' placeholder='请输入账号：admin' prefixIcon={<UserIcon />}></Input>
+              <Input size='large' placeholder='请输入用户名' prefixIcon={<UserIcon />}></Input>
             </FormItem>
             <FormItem name='password' rules={[{ required: true, message: '密码必填', type: 'error' }]}>
               <Input
                 size='large'
                 type={showPsw ? 'text' : 'password'}
                 clearable
-                placeholder='请输入登录密码：admin'
+                placeholder='请输入登录密码'
                 prefixIcon={<LockOnIcon />}
                 suffixIcon={
                   showPsw ? (
@@ -71,6 +100,27 @@ export default function Login() {
                   )
                 }
               />
+            </FormItem>
+            <FormItem name='tenantCode' rules={[{ required: true, message: '请选择租户', type: 'error' }]}>
+              <Select 
+                size='large' 
+                placeholder='请选择租户'
+                loading={loadingTenants}
+                filterable
+                clearable
+              >
+                {tenants.map((tenant) => (
+                  <Option 
+                    key={tenant.code} 
+                    label={`${tenant.name} (${tenant.code})`} 
+                    value={tenant.code}
+                  >
+                    <div>
+                      <div>{tenant.name}</div>
+                    </div>
+                  </Option>
+                ))}
+              </Select>
             </FormItem>
             <div className={classnames(Style.checkContainer, Style.rememberPwd)}>
               <Checkbox>记住账号</Checkbox>

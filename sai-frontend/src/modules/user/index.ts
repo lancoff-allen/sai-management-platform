@@ -1,99 +1,101 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../store';
+import { loginApi, logoutApi, getUserInfoApi, LoginRequest } from 'services/auth';
 
 const namespace = 'user';
 const TOKEN_NAME = 'tdesign-starter';
 
 const initialState = {
-  token: localStorage.getItem(TOKEN_NAME) || 'main_token', // 默认token不走权限
+  token: localStorage.getItem(TOKEN_NAME) || '',
   userInfo: {},
+  loading: false,
+  error: null as string | null,
 };
 
-// login
-export const login = createAsyncThunk(`${namespace}/login`, async (userInfo: Record<string, unknown>) => {
-  const mockLogin = async (userInfo: Record<string, unknown>) => {
-    // 登录请求流程
-    console.log(userInfo);
-    // const { account, password } = userInfo;
-    // if (account !== 'td') {
-    //   return {
-    //     code: 401,
-    //     message: '账号不存在',
-    //   };
-    // }
-    // if (['main_', 'dev_'].indexOf(password) === -1) {
-    //   return {
-    //     code: 401,
-    //     message: '密码错误',
-    //   };
-    // }
-    // const token = {
-    //   main_: 'main_token',
-    //   dev_: 'dev_token',
-    // }[password];
-    return {
-      code: 200,
-      message: '登陆成功',
-      data: 'main_token',
+// 登录异步 action
+export const login = createAsyncThunk(
+  `${namespace}/login`,
+  async (userInfo: { account: string; password: string; tenantCode?: string }) => {
+    const loginParams: LoginRequest = {
+      username: userInfo.account,
+      password: userInfo.password,
+      tenantCode: userInfo.tenantCode || 'default', // 默认租户
     };
-  };
-
-  const res = await mockLogin(userInfo);
-  if (res.code === 200) {
-    return res.data;
+    
+    const response = await loginApi(loginParams);
+    return response;
   }
-  throw res;
-});
+);
 
-// getUserInfo
-export const getUserInfo = createAsyncThunk(`${namespace}/getUserInfo`, async (_, { getState }: any) => {
-  const { token } = getState();
-  const mockRemoteUserInfo = async (token: string) => {
-    if (token === 'main_token') {
-      return {
-        name: 'td_main',
-        roles: ['all'],
-      };
+// 登出异步 action
+export const logout = createAsyncThunk(
+  `${namespace}/logout`,
+  async (_, { getState }) => {
+    const state = getState() as RootState;
+    if (state.user.token) {
+      await logoutApi();
     }
-    return {
-      name: 'td_dev',
-      roles: ['userIndex', 'dashboardBase', 'login'],
-    };
-  };
+    localStorage.removeItem(TOKEN_NAME);
+  }
+);
 
-  const res = await mockRemoteUserInfo(token);
-
-  return res;
-});
+// 获取用户信息异步 action
+export const getUserInfo = createAsyncThunk(
+  `${namespace}/getUserInfo`,
+  async (_, { getState }) => {
+    const state = getState() as RootState;
+    if (!state.user.token) {
+      throw new Error('No token available');
+    }
+    
+    const userInfo = await getUserInfoApi();
+    return userInfo;
+  }
+);
 
 const userSlice = createSlice({
   name: namespace,
   initialState,
   reducers: {
-    logout: (state) => {
-      localStorage.removeItem(TOKEN_NAME);
-      state.token = '';
-      state.userInfo = {};
+    clearError: (state) => {
+      state.error = null;
     },
-    remove: (state) => {
-      state.token = '';
+    setToken: (state, action) => {
+      state.token = action.payload;
+      localStorage.setItem(TOKEN_NAME, action.payload);
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(login.fulfilled, (state, action) => {
-        localStorage.setItem(TOKEN_NAME, action.payload);
-
-        state.token = action.payload;
+      // 登录相关
+      .addCase(login.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
+      .addCase(login.fulfilled, (state, action) => {
+        state.loading = false;
+        state.token = action.payload.token;
+        state.userInfo = action.payload.userInfo || {};
+        localStorage.setItem(TOKEN_NAME, action.payload.token);
+      })
+      .addCase(login.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || '登录失败';
+      })
+      // 登出相关
+      .addCase(logout.fulfilled, (state) => {
+        state.token = '';
+        state.userInfo = {};
+        state.error = null;
+      })
+      // 获取用户信息相关
       .addCase(getUserInfo.fulfilled, (state, action) => {
         state.userInfo = action.payload;
       });
   },
 });
 
-export const selectListBase = (state: RootState) => state.listBase;
-
-export const { logout, remove } = userSlice.actions;
+export const selectUser = (state: RootState) => state.user;
+export const { clearError, setToken } = userSlice.actions;
 
 export default userSlice.reducer;
