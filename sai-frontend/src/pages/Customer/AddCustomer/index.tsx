@@ -16,6 +16,7 @@ import { FormInstanceFunctions, SubmitContext } from 'tdesign-react/es/form/type
 import classnames from 'classnames';
 import CommonStyle from '../../../styles/common.module.less';
 import Style from '../../Form/Base/index.module.less';
+import { createCustomer } from 'services/customer';
 
 const { FormItem } = Form;
 const { Option } = Select;
@@ -158,18 +159,38 @@ const AddCustomerPage: React.FC = () => {
       const values = form.getFieldsValue(true);
       
       const submitData = {
-        ...values,
-        status: values.status === 'true'
+        customerName: values.customerName,
+        // 修复状态字段类型转换
+        status: values.status === 'true' || values.status === true,
+        country: values.country,
+        province: values.province || '',
+        city: values.city || '',
+        district: values.district || '',
+        contactPerson: values.contactPerson || '',
+        contactPhone: values.contactPhone,
+        contactEmail: values.contactEmail || '',
+        remark: values.remark || '',
       };
       
       console.log('提交的客户数据:', submitData);
       
+      // 调用真实API
+      const result = await createCustomer(submitData);
+      
       MessagePlugin.success('客户添加成功！');
       navigate('/customer/list');
-    } catch (error) {
-      const firstError = Object.values(error as any)[0];
-      if (firstError) {
-        MessagePlugin.error((firstError as any).message);
+    } catch (error: any) {
+      console.error('创建客户失败:', error);
+      // 处理后端验证错误
+      if (error.response?.data?.message) {
+        MessagePlugin.error(error.response.data.message);
+      } else if (error.response?.data?.errors) {
+        // 处理字段验证错误
+        const errors = error.response.data.errors;
+        const firstError = Object.values(errors)[0];
+        MessagePlugin.error(firstError as string);
+      } else {
+        MessagePlugin.error('客户添加失败，请稍后重试');
       }
     } finally {
       setLoading(false);
@@ -249,72 +270,32 @@ const AddCustomerPage: React.FC = () => {
             </Col>
           </Row>
 
-          {/* 详细地址部分 */}
-          <div className={Style.titleBox}>
-            <div className={Style.titleText}>详细地址</div>
-          </div>
-          
-          <Row gutter={[32, 24]}>
-            <Col span={6}>
-              <FormItem
-                label="省份"
-                name="province"
-                initialData={INITIAL_DATA.province}
-                rules={isChinaSelected ? [{ required: true, message: '省份必填', type: 'error' }] : []}
-              >
-                <Select 
-                  placeholder="请选择省份" 
-                  filterable
-                  clearable
-                  disabled={!isChinaSelected}
-                  onChange={handleProvinceChange}
-                >
-                  {PROVINCE_OPTIONS.map((item) => (
-                    <Option key={item.value} label={item.label} value={item.value} />
-                  ))}
-                </Select>
-              </FormItem>
-            </Col>
-            <Col span={6}>
-              <FormItem
-                label="城市"
-                name="city"
-                initialData={INITIAL_DATA.city}
-                rules={isChinaSelected ? [{ required: true, message: '城市必填', type: 'error' }] : []}
-              >
-                <Select 
-                  placeholder="请选择城市" 
-                  filterable
-                  clearable
-                  disabled={!isChinaSelected || !province}
-                  onChange={handleCityChange}
-                >
-                  {availableCities.map((item) => (
-                    <Option key={item.value} label={item.label} value={item.value} />
-                  ))}
-                </Select>
-              </FormItem>
-            </Col>
-            <Col span={6}>
-              <FormItem
-                label="区县"
-                name="district"
-                initialData={INITIAL_DATA.district}
-                rules={isChinaSelected ? [{ required: true, message: '区县必填', type: 'error' }] : []}
-              >
-                <Select 
-                  placeholder="请选择区县" 
-                  filterable
-                  clearable
-                  disabled={!isChinaSelected || !city}
-                >
-                  {availableDistricts.map((item) => (
-                    <Option key={item.value} label={item.label} value={item.value} />
-                  ))}
-                </Select>
-              </FormItem>
-            </Col>
-          </Row>
+          {/* 详细地址部分 - 只有选择中国时才显示 */}
+          {country === 'china' && (
+            <>
+              <div className={Style.titleBox}>
+                <div className={Style.titleText}>详细地址</div>
+              </div>
+              
+              <Row gutter={[32, 24]}>
+                <Col span={6}>
+                  <FormItem label='省份' name='province'>
+                    <Input placeholder='请输入省份' clearable />
+                  </FormItem>
+                </Col>
+                <Col span={6}>
+                  <FormItem label='城市' name='city'>
+                    <Input placeholder='请输入城市' clearable />
+                  </FormItem>
+                </Col>
+                <Col span={6}>
+                  <FormItem label='区县' name='district'>
+                    <Input placeholder='请输入区县' clearable />
+                  </FormItem>
+                </Col>
+              </Row>
+            </>
+          )}
 
           {/* 其他信息部分 */}
           <div className={Style.titleBox}>
@@ -338,13 +319,18 @@ const AddCustomerPage: React.FC = () => {
                 initialData={INITIAL_DATA.contactPhone}
                 rules={[
                   { required: true, message: '联系电话必填', type: 'error' },
-                  { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', type: 'error' }
+                  { 
+                    pattern: /^1[3-9]\d{9}$/, 
+                    message: '请输入正确的手机号码', 
+                    type: 'error' 
+                  }
                 ]}
               >
                 <Input placeholder="请输入联系电话" />
               </FormItem>
             </Col>
             <Col span={6}>
+              {/* 联系邮箱的FormItem */}
               <FormItem
                 label="联系邮箱"
                 name="contactEmail"
@@ -353,7 +339,7 @@ const AddCustomerPage: React.FC = () => {
                   { 
                     pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, 
                     message: '请输入正确的邮箱地址', 
-                    type: 'warning' 
+                    type: 'error' 
                   }
                 ]}
               >

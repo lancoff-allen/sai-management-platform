@@ -1,12 +1,28 @@
 import React, { useRef, memo } from 'react';
-import { Row, Col, Form, Input, Button, MessagePlugin } from 'tdesign-react';
+import { Row, Col, Form, Input, Button, MessagePlugin, Select } from 'tdesign-react';
 import { FormInstanceFunctions, SubmitContext } from 'tdesign-react/es/form/type';
 import { useNavigate } from 'react-router-dom';
 
 const { FormItem } = Form;
+const { Option } = Select;
+
+// 国家选项常量数组
+const COUNTRY_OPTIONS = [
+  { label: '中国', value: 'china' },
+  { label: '美国', value: 'usa' },
+  { label: '日本', value: 'japan' },
+  { label: '德国', value: 'germany' },
+  { label: '英国', value: 'uk' },
+  { label: '法国', value: 'france' },
+  { label: '韩国', value: 'korea' },
+  { label: '意大利', value: 'italy' },
+  { label: '加拿大', value: 'canada' },
+  { label: '澳大利亚', value: 'australia' },
+];
 
 export interface FormValueType {
   name?: string;
+  country?: string;  // 新增国家搜索
 }
 
 interface SearchFormProps {
@@ -45,6 +61,15 @@ const SearchForm: React.FC<SearchFormProps> = (props) => {
               <Col span={3} xs={12} sm={6} xl={3}>
                 <FormItem label='客户名称' name='name'>
                   <Input placeholder='请输入客户名称' clearable />
+                </FormItem>
+              </Col>
+              <Col span={3} xs={12} sm={6} xl={3}>
+                <FormItem label='国家' name='country'>
+                  <Select placeholder='请选择国家' clearable filterable>
+                    {COUNTRY_OPTIONS.map((item) => (
+                      <Option key={item.value} label={item.label} value={item.value} />
+                    ))}
+                  </Select>
                 </FormItem>
               </Col>
             </Row>

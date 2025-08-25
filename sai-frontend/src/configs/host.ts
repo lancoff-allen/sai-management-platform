@@ -1,22 +1,18 @@
 export default {
   mock: {
-    // 本地mock数据
     API: '',
   },
   development: {
-    // 开发环境接口请求 - 修改为本地后端地址
+    // 修改：添加 /api 路径，匹配后端的 context-path
     API: 'http://localhost:8080/api',
   },
   test: {
-    // 测试环境接口地址
     API: 'https://service-exndqyuk-1257786608.gz.apigw.tencentcs.com',
   },
   release: {
-    // 正式环境接口地址
     API: 'https://service-bv448zsw-1257786608.gz.apigw.tencentcs.com',
   },
   site: {
-    // TDesign部署特殊需要 与release功能一致
     API: 'https://service-bv448zsw-1257786608.gz.apigw.tencentcs.com',
   },
 };

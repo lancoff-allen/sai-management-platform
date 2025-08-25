@@ -13,6 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+// 需要添加import
+import org.springframework.http.HttpMethod;
 
 /**
  * Spring Security 配置类
@@ -67,7 +69,11 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()  // 修改为 /auth/**
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()  // 允许所有OPTIONS请求
+                .requestMatchers("/api/auth/**").permitAll()
+                // TODO: 临时开放客户接口，后续需要改为需要认证
+                // 生产环境中应该移除下面这行，改为 .requestMatchers("/api/customers/**").authenticated()
+                .requestMatchers("/api/customers/**").permitAll()  // 临时添加，允许客户接口无需认证
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**").permitAll()
                 .anyRequest().authenticated()
             )
