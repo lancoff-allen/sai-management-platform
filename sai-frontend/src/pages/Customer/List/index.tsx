@@ -205,11 +205,13 @@ export const CustomerListTable = () => {
       fixed: 'right' as const,
       cell: ({ row }: any) => (
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+          {/* TODO: 后续实现编辑功能 - 允许用户修改客户信息 */}
+          {/* TODO: 后续实现管理功能 - 包括查看详情、状态切换等操作 */}
           <Button 
             theme='primary' 
             variant='text' 
             onClick={() => {
-              // 处理管理操作
+              // TODO: 实现客户管理功能（查看详情、编辑等）
               console.log('管理客户:', row);
             }}
           >

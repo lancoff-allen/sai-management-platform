@@ -175,10 +175,21 @@ const AddCustomerPage: React.FC = () => {
       console.log('提交的客户数据:', submitData);
       
       // 调用真实API
+      // 修改 handleSubmit 函数中的成功处理逻辑
       const result = await createCustomer(submitData);
       
-      MessagePlugin.success('客户添加成功！');
-      navigate('/customer/list');
+      // 移除或注释掉 MessagePlugin，因为成功页面会显示成功信息
+      // MessagePlugin.success('客户添加成功！');
+      
+      // 跳转到成功页面，传递客户信息
+      navigate('/customer/success', {
+        state: {
+          title: '客户创建成功',
+          description: '客户信息已保存，您可以继续管理客户或查看客户列表。',
+          customerName: submitData.customerName
+        }
+      });
+      // 删除这行：navigate('/customer/list');
     } catch (error: any) {
       console.error('创建客户失败:', error);
       // 处理后端验证错误

@@ -25,6 +25,14 @@ const result: IRouter[] = [
           hidden: true,  // 添加这行，隐藏菜单项
         },
       },
+      {
+        path: 'success',
+        Component: lazy(() => import('pages/Result/Success')),
+        meta: {
+          title: '操作成功',
+          hidden: true,  // 隐藏菜单项
+        },
+      },
     ],
   },
 ];
